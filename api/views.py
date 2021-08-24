@@ -6,12 +6,20 @@ from .serializers import *
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveAPIView, UpdateAPIView, DestroyAPIView
 from rest_framework.response import Response
+from rest_framework.mixins import CreateModelMixin, DestroyModelMixin, UpdateModelMixin
 
+# for parsers
+from rest_framework.parsers import FormParser, MultiPartParser
+
+# import viewset
+from rest_framework.viewsets import ModelViewSet
 
 # Create your views here.
 
 # class based view
 
+# for getting the detail overview of class based views
+# go to documentation of DRF, and check out class based views
 class StatusAPIView(APIView):
     def get(self, request, format=None):
         status_list = Status.objects.all()
@@ -51,3 +59,38 @@ class StatusDeleteApiView(DestroyAPIView):
     queryset = Status.objects.all()
     serializer_class = StatusSerializer
     lookup_field = 'id'
+
+
+# how to use view efficiently using mixins
+# createmodelmixin will allow us to get and post status altogether with one class only
+
+class StatusListCreateView(CreateModelMixin, ListAPIView):
+    queryset = Status.objects.all()
+    serializer_class = StatusSerializer
+    # we need parser classes when someone upload image with content from frontend
+    # for example, when you want to submit a image with description from frontend side
+    parser_classes = [FormParser, MultiPartParser]
+    
+    def post(self, request, *args, **kwargs):
+        return self.request(request, *args, **kwargs)
+
+
+class StatusUpdateDeleteApiView(UpdateModelMixin, DestroyModelMixin, RetrieveAPIView):
+    queryset = Status.objects.all()
+    serializer_class = StatusSerializer
+    lookup_field = 'id'
+    parser_classes = [FormParser, MultiPartParser]
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+    
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+    
+
+# advance: VIEWSET  will allow us to create one class
+# and apply full CRUD operation 
+class StatusViewSet(ModelViewSet):
+    queryset = Status.objects.all()
+    serializer_class = StatusSerializer
+    parser_classes = [FormParser, MultiPartParser]
