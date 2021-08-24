@@ -6,12 +6,14 @@ from .serializers import *
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveAPIView, UpdateAPIView, DestroyAPIView
 from rest_framework.response import Response
-
+from rest_framework.mixins import CreateModelMixin, DestroyModelMixin, UpdateModelMixin
 
 # Create your views here.
 
 # class based view
 
+# for getting the detail overview of class based views
+# go to documentation of DRF, and check out class based views
 class StatusAPIView(APIView):
     def get(self, request, format=None):
         status_list = Status.objects.all()
@@ -51,3 +53,28 @@ class StatusDeleteApiView(DestroyAPIView):
     queryset = Status.objects.all()
     serializer_class = StatusSerializer
     lookup_field = 'id'
+
+
+# how to use view efficiently using mixins
+# createmodelmixin will allow us to get and post status altogether with one class only
+
+class StatusListCreateView(CreateModelMixin, ListAPIView):
+    queryset = Status.objects.all()
+    serializer_class = StatusSerializer
+    
+    def post(self, request, *args, **kwargs):
+        return self.request(request, *args, **kwargs)
+
+
+class StatusUpdateDeleteApiView(UpdateModelMixin, DestroyModelMixin, RetrieveAPIView):
+    queryset = Status.objects.all()
+    serializer_class = StatusSerializer
+    lookup_field = 'id'
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+    
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+    
+    
