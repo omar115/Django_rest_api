@@ -8,6 +8,12 @@ from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveAPIView,
 from rest_framework.response import Response
 from rest_framework.mixins import CreateModelMixin, DestroyModelMixin, UpdateModelMixin
 
+# for parsers
+from rest_framework.parsers import FormParser, MultiPartParser
+
+# import viewset
+from rest_framework.viewsets import ModelViewSet
+
 # Create your views here.
 
 # class based view
@@ -61,6 +67,9 @@ class StatusDeleteApiView(DestroyAPIView):
 class StatusListCreateView(CreateModelMixin, ListAPIView):
     queryset = Status.objects.all()
     serializer_class = StatusSerializer
+    # we need parser classes when someone upload image with content from frontend
+    # for example, when you want to submit a image with description from frontend side
+    parser_classes = [FormParser, MultiPartParser]
     
     def post(self, request, *args, **kwargs):
         return self.request(request, *args, **kwargs)
@@ -70,6 +79,7 @@ class StatusUpdateDeleteApiView(UpdateModelMixin, DestroyModelMixin, RetrieveAPI
     queryset = Status.objects.all()
     serializer_class = StatusSerializer
     lookup_field = 'id'
+    parser_classes = [FormParser, MultiPartParser]
 
     def put(self, request, *args, **kwargs):
         return self.update(request, *args, **kwargs)
@@ -77,4 +87,10 @@ class StatusUpdateDeleteApiView(UpdateModelMixin, DestroyModelMixin, RetrieveAPI
     def delete(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)
     
-    
+
+# advance: VIEWSET  will allow us to create one class
+# and apply full CRUD operation 
+class StatusViewSet(ModelViewSet):
+    queryset = Status.objects.all()
+    serializer_class = StatusSerializer
+    parser_classes = [FormParser, MultiPartParser]
