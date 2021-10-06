@@ -131,3 +131,7 @@ dmypy.json
 
 # media
 media
+
+
+#ds store
+.DS_Store
